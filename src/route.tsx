@@ -46,10 +46,10 @@ const Routess = () => {
     <>
     <LoadingBar color='#2563EB'  progress={progress} onLoaderFinished={() => setProgress(0)} />
       <Routes>
-        <Route index path="home" element={<LandingPage />} />
-        <Route path="order" element={<Order />} />
-        <Route path="confirmation" element={<Confirmation />} />
-        <Route path="payment" element={<Payment />}></Route>
+        <Route index path="/home" element={<LandingPage />} />
+        <Route path="/order" element={<Order />} />
+        <Route path="/confirmation" element={<Confirmation />} />
+        <Route path="/payment" element={<Payment />}></Route>
         <Route path="/login" element={<Login />} />
           <Route
             path="/"
