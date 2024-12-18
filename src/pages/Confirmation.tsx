@@ -22,7 +22,7 @@ const Confirmation = () => {
         <nav className="flex justify-between h-16 bg-[#2B3A51]">
           <div className="flex items-center space-x-4 px-16">
             <img
-              src="./public/logo.png"
+              src="/logo.png"
               alt=""
               className="h-10 w-10 cursor-pointer"
               onClick={() => navigate("/auth/login")}
@@ -124,7 +124,7 @@ const Confirmation = () => {
                   <div className="flex justify-between mx-16">
                     <div>
                       <p className="">PT Terus Melayani Bangsa</p>
-                      <img src="./public/ttd.png" alt="" className="w-32"/>
+                      <img src="/ttd.png" alt="" className="w-32"/>
                       <p>Saiful Bacthtiar</p>
                       <p>Direktur</p>
                     </div>
@@ -135,7 +135,7 @@ const Confirmation = () => {
                         month: "long",
                         day: "numeric",
                       })}</p>
-                      <img src="./public/emat.jpeg" alt="" className="w-32" />
+                      <img src="/emat.jpeg" alt="" className="w-32" />
                       <p>{formData.name}</p>
                       <p>Pemohon</p>
                     </div>

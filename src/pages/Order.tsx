@@ -240,7 +240,7 @@ const Order = () => {
         <nav className="flex justify-between h-16 bg-[#2B3A51]">
           <div className="flex items-center space-x-4 px-16">
             <img
-              src="./public/logo.png"
+              src="/logo.png"
               alt=""
               className="h-10 w-10 cursor-pointer"
               onClick={() => navigate("/auth/login")}
