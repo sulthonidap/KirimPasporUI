@@ -1,19 +1,29 @@
-[
-  {
-    "rewrites": [
-      { "source": "/(.*)", "destination": "/index.html" }
-    ]
-  },
-  {
+{
     "headers": [
       {
-        "source": "/(.*).png",
-        "headers": [{ "key": "Content-Type", "value": "image/png" }]
+        "source": "/:path*.png",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "image/png"
+          }
+        ]
       },
       {
-        "source": "/(.*).jpeg",
-        "headers": [{ "key": "Content-Type", "value": "image/jpeg" }]
+        "source": "/:path*.jpeg",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "image/jpeg"
+          }
+        ]
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "/(.*)",
+        "destination": "/index.html"
       }
     ]
   }
-]
+  
