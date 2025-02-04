@@ -35,6 +35,19 @@ const MapCenterHandler = ({ position }: { position: [number, number] }) => {
   return null;
 };
 
+// Add interface for office type
+interface Office {
+  value: string;
+  label: string;
+}
+
+// Add interface for contact type
+interface Contact {
+  name: string;
+  phone: string;
+  [key: string]: string; // Add index signature for dynamic access
+}
+
 const Order = () => {
   const navigate = useNavigate();
 
@@ -48,13 +61,14 @@ const Order = () => {
   const [selectedProvince, setSelectedProvince] = useState("");
   const [selectedOffice, setSelectedOffice] = useState("");
   const [address, setAddress] = useState<string>("");
-  const [provinces, setProvinces] = useState([
+  const [provinces] = useState([
     { value: "", label: <em>None</em> },
     { value: 10, label: "DK Jakarta" },
     { value: 20, label: "Jawa Barat" },
   ]);
 
-  const offices = {
+  // Type the offices object
+  const offices: { [key: number]: Office[] } = {
     10: [
       {
         value: "-6.288689,106.830302",
@@ -104,14 +118,16 @@ const Order = () => {
     }
   };
 
-  const handleDragEnd = async (e: any) => {
+  // Fix the markerPosition initial state
+  const [markerPosition, setMarkerPosition] = useState<[number, number]>([0, 0]);
+
+  // Fix the handleDragEnd type
+  const handleDragEnd = async (e: { target: { getLatLng: () => { lat: number; lng: number } } }) => {
     const { lat, lng } = e.target.getLatLng();
     setMarkerPosition([lat, lng]);
-    setAddress("Loading..."); // Reset alamat saat drag dimulai
-    await getAddressFromCoordinates(lat, lng); // Ambil alamat terbaru
+    setAddress("Loading..."); 
+    await getAddressFromCoordinates(lat, lng);
   };
-
-  const [markerPosition, setMarkerPosition] = useState<[number, number]>(null);
 
   const handleInputChange = (event: React.SyntheticEvent, value: string) => {
     setInputLocation(value);
@@ -123,13 +139,19 @@ const Order = () => {
     }
   };
 
+  // Add interface for nominatim response
+  interface NominatimResponse {
+    display_name: string;
+  }
+
+  // Fix any type in suggestions mapping
   const fetchSuggestions = async (value: string) => {
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${value}`
       );
       const data = await response.json();
-      const newSuggestions = data.map((item: any) => item.display_name);
+      const newSuggestions = data.map((item: NominatimResponse) => item.display_name);
       setSuggestions(newSuggestions);
     } catch (error) {
       console.error("Error fetching suggestions:", error);
@@ -206,7 +228,7 @@ const Order = () => {
 
   const [activeStep, setActiveStep] = useState(0);
 
-  
+
 
   const [formData, setFormData] = useState({
     province: "",
@@ -234,6 +256,24 @@ const Order = () => {
     }
   }, [formData, address]);
 
+  // Fix the contacts state and handlers
+  const [contacts, setContacts] = useState<Contact[]>([{ name: "", phone: "" }]);
+
+  const handleAddContact = () => {
+    setContacts([...contacts, { name: "", phone: "" }]);
+  };
+
+  const handleContactChange = (index: number, field: keyof Contact, value: string) => {
+    const newContacts = [...contacts];
+    newContacts[index][field] = value;
+    setContacts(newContacts);
+  };
+
+  const handleRemoveContact = (index: number) => {
+    const newContacts = contacts.filter((_, i) => i !== index);
+    setContacts(newContacts);
+  };
+
   return (
     <>
       <div className="min-h-screen ">
@@ -255,13 +295,13 @@ const Order = () => {
           <div className=" bg-black bg-opacity-50 w-full h-full">
             <div className="bg-white p-4 m-10 rounded-lg">
               <h1 className="text-2xl font-bold mb-14">Formulir Pemesanan</h1>
-              
+
               {/* Container untuk Stepper dan Form */}
               <div className="flex gap-8">
                 {/* Stepper di sebelah kiri */}
                 <div className="w-1/4">
-                  <Stepper 
-                    activeStep={activeStep} 
+                  <Stepper
+                    activeStep={activeStep}
                     orientation="vertical"
                     sx={{
                       '& .MuiStepLabel-root': {
@@ -318,7 +358,7 @@ const Order = () => {
                           onChange={handleChangeOffice}
                         >
                           <MenuItem value=""><em>None</em></MenuItem>
-                          {offices[selectedProvince]?.map((office) => (
+                          {selectedProvince && offices[parseInt(selectedProvince)]?.map((office: Office) => (
                             <MenuItem key={office.value} value={office.value}>
                               {office.label}
                             </MenuItem>
@@ -328,9 +368,9 @@ const Order = () => {
                       </FormControl>
 
                       <FormControl variant="standard" sx={{ m: 1, minWidth: 120, width: "100%" }}>
-                        <TextField 
-                          label="Nomor Pemohon Paspor" 
-                          variant="outlined" 
+                        <TextField
+                          label="Nomor Pemohon Paspor"
+                          variant="outlined"
                           type="number"
                           value={formData.passportNumber}
                           onChange={(e) => setFormData(prev => ({ ...prev, passportNumber: e.target.value }))}
@@ -356,16 +396,58 @@ const Order = () => {
                   {/* Form Kedua - Data Pribadi */}
                   <div className={`transition-opacity duration-300 ${activeStep >= 1 ? 'opacity-100' : 'opacity-50'}`}>
                     <h2 className="text-xl font-semibold mb-4">Data Pribadi</h2>
-                    <div className="grid grid-cols-2 gap-4">
+                    {/* <div className="grid grid-cols-2 gap-4">
                       <FormControl variant="standard" sx={{ minWidth: 120, width: "100%" }}>
                         <TextField label="Nama Lengkap" variant="outlined" value={formData.name} onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))} />
                       </FormControl>
-                      
-                      <FormControl variant="standard" sx={{  minWidth: 120, width: "100%" }}>
+
+                      <FormControl variant="standard" sx={{ minWidth: 120, width: "100%" }}>
                         <TextField label="Nomor Whatsapp" variant="outlined" type="number" value={formData.whatsapp} onChange={(e) => setFormData(prev => ({ ...prev, whatsapp: e.target.value }))} />
                       </FormControl>
+
+                    </div> */}
+                    {/* <br /> */}
+
+                    <div>
+                    {contacts.map((contact, contactIndex) => (
+                      <div key={contactIndex}>
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <FormControl variant="standard" sx={{ minWidth: 120, width: "100%" }}>
+                            <TextField
+                              label="Nama"
+                              variant="outlined"
+                              value={contact.name}
+                              onChange={(e) => handleContactChange(contactIndex, "name", e.target.value)}
+                            />
+                          </FormControl>
+
+                          <FormControl variant="standard" sx={{ minWidth: 120, width: "100%" }}>
+                            <TextField
+                              label="Nomor Whatsapp"
+                              variant="outlined"
+                              type="number"
+                              value={contact.phone}
+                              onChange={(e) => handleContactChange(contactIndex, "phone", e.target.value)}
+                            />
+                          </FormControl>
+                        </div>
+                      </div>
+                    ))}
+                    {/* Buttons container */}
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="contained" 
+                        color="error" 
+                        onClick={() => handleRemoveContact(contacts.length - 1)}
+                        disabled={contacts.length <= 1}
+                      >
+                        Hapus
+                      </Button>
+                      <Button variant="contained" onClick={handleAddContact}>
+                        Tambah Pemohon
+                      </Button>
                     </div>
-                    <br />
+                  </div>
 
                     {/* Map Component - Full Width */}
                     <div className="mt-4">
@@ -391,7 +473,7 @@ const Order = () => {
                         <Button
                           variant="contained"
                           onClick={searchLocation}
-                          sx={{ 
+                          sx={{
                             height: '56px',  // Sesuaikan dengan tinggi TextField
                             marginLeft: '10px',
                             marginTop: '0px' // Hapus margin top agar sejajar
@@ -401,7 +483,7 @@ const Order = () => {
                         </Button>
                       </div>
                       <div>
-                      {address && (
+                        {address && (
                           <div className="mt-2 p-3 bg-gray-100 rounded-md">
                             <p className="font-semibold">Alamat yang dipilih:</p>
                             <p className="text-gray-700">{address}</p>
@@ -447,19 +529,20 @@ const Order = () => {
                           </div>
                         )}
 
-                        
+
                       </div>
                     </div>
                   </div>
+                  
                   <div className="flex justify-end">
-                  <Button
+                    <Button
                       variant="contained"
                       onClick={() => navigate("/confirmation", { state: { formData } })}
                       className=""
                     >
                       Lanjut
                     </Button>
-                    </div>
+                  </div>
                 </div>
               </div>
             </div>
